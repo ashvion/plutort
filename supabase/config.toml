@@ -1,1 +1,10 @@
 project_id = "ebopskahhtekzyjmfghj"
+
+[functions.analyze-content]
+verify_jwt = true
+
+[functions.chat-with-analysis]
+verify_jwt = true
+
+[functions.general-chat]
+verify_jwt = false

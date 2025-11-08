@@ -20,16 +20,10 @@ const Layout = ({ children }: LayoutProps) => {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
-      if (!session) {
-        navigate("/auth");
-      }
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setSession(session);
-      if (!session) {
-        navigate("/auth");
-      }
     });
 
     return () => subscription.unsubscribe();
@@ -45,18 +39,21 @@ const Layout = ({ children }: LayoutProps) => {
   };
 
   const navItems = [
-    { path: "/", label: "Analyze", icon: Brain },
+    { path: "/analyze", label: "Analyze", icon: Brain },
     { path: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   ];
 
-  if (!session) return null;
+  if (!session) {
+    navigate("/auth");
+    return null;
+  }
 
   return (
     <div className="min-h-screen bg-background">
       <header className="border-b border-border bg-card sticky top-0 z-50">
         <div className="container mx-auto px-4">
           <div className="flex h-16 items-center justify-between">
-            <Link to="/" className="flex items-center gap-2">
+            <Link to="/analyze" className="flex items-center gap-2">
               <div className="p-2 bg-gradient-primary rounded-lg">
                 <Brain className="h-6 w-6 text-primary-foreground" />
               </div>
