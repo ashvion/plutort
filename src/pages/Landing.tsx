@@ -91,8 +91,8 @@ const Landing = () => {
             </Button>
           </div>
 
-          {/* Demo Visual */}
-          <div className="mt-12 relative">
+          {/* Demo Visual */} 
+          {/* <div className="mt-12 relative">
             <div className="absolute inset-0 bg-gradient-primary opacity-20 blur-3xl rounded-full" />
             <Card className="relative border-2 shadow-2xl">
               <CardContent className="p-8">
@@ -115,7 +115,7 @@ const Landing = () => {
                 </div>
               </CardContent>
             </Card>
-          </div>
+          </div> */}
         </div>
       </section>
 
