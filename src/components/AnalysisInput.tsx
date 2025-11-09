@@ -52,7 +52,19 @@ const AnalysisInput = ({ onAnalysisComplete }: AnalysisInputProps) => {
         body: { type: "url", urls: validUrls }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Check if it's a blocking error
+        if (error.message?.includes("Unable to extract content")) {
+          toast({
+            title: "Content Blocked",
+            description: "The website is blocking automated access. Try a different URL or copy the article text directly.",
+            variant: "destructive",
+          });
+        } else {
+          throw error;
+        }
+        return;
+      }
 
       toast({
         title: "Analysis Complete",
@@ -63,9 +75,20 @@ const AnalysisInput = ({ onAnalysisComplete }: AnalysisInputProps) => {
       setUrls([""]);
     } catch (error: any) {
       console.error("Analysis error:", error);
+      
+      // Provide more specific error messages
+      let errorMessage = "Failed to analyze content";
+      if (error.message?.includes("Failed to fetch")) {
+        errorMessage = "Network error. Please check your connection and try again.";
+      } else if (error.message?.includes("blocked")) {
+        errorMessage = "The website is blocking automated access. Try copying the article text instead.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Analysis Failed",
-        description: error.message || "Failed to analyze content",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -79,6 +102,10 @@ const AnalysisInput = ({ onAnalysisComplete }: AnalysisInputProps) => {
         <CardTitle>Analyze Content</CardTitle>
         <CardDescription>
           Enter up to 3 URLs to get AI-powered insights
+          <br />
+          <span className="text-xs text-muted-foreground mt-1 block">
+            Note: Some websites may block automated access. If analysis fails, try a different source.
+          </span>
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
