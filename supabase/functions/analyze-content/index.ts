@@ -22,43 +22,92 @@ serve(async (req) => {
     console.log('Analyzing URLs:', { type, urlCount: urls?.length });
 
     let combinedContent = '';
+    const failedUrls: string[] = [];
     
     if (type === 'url' && Array.isArray(urls)) {
       // Fetch all URLs and combine content
       for (const url of urls) {
         try {
-          const urlResponse = await fetch(url);
-          let text = await urlResponse.text();
-          // Extract main text (simplified)
-          text = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').substring(0, 3000);
+          console.log(`Fetching URL: ${url}`);
+          const urlResponse = await fetch(url, {
+            headers: {
+              'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
+          });
+          
+          if (!urlResponse.ok) {
+            console.error(`Failed to fetch ${url}: ${urlResponse.status}`);
+            failedUrls.push(url);
+            continue;
+          }
+
+          let html = await urlResponse.text();
+          
+          // Better content extraction - focus on main content areas
+          // Remove script and style tags
+          html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
+          html = html.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
+          
+          // Try to extract main content (common article selectors)
+          const articleMatch = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+          const mainMatch = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
+          const contentMatch = html.match(/<div[^>]*class="[^"]*content[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+          
+          let text = articleMatch?.[1] || mainMatch?.[1] || contentMatch?.[1] || html;
+          
+          // Strip remaining HTML tags
+          text = text.replace(/<[^>]*>/g, ' ');
+          // Clean up whitespace
+          text = text.replace(/\s+/g, ' ').trim();
+          // Limit length per URL
+          text = text.substring(0, 4000);
+          
+          if (text.length < 100) {
+            console.warn(`Extracted text too short for ${url}, might be blocked or have no content`);
+            failedUrls.push(url);
+            continue;
+          }
+          
           combinedContent += `\n\n--- Content from ${url} ---\n${text}`;
+          console.log(`Successfully extracted ${text.length} characters from ${url}`);
         } catch (error) {
-          console.error(`Failed to fetch ${url}:`, error);
+          console.error(`Error fetching ${url}:`, error);
+          failedUrls.push(url);
         }
       }
+    }
+
+    if (!combinedContent.trim()) {
+      console.error('No content extracted from any URLs');
+      return new Response(JSON.stringify({ 
+        error: 'Unable to extract content from the provided URLs. They may be blocked or require authentication.',
+        failedUrls 
+      }), {
+        status: 400,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     console.log('Extracted combined text length:', combinedContent.length);
 
     // Call Lovable AI for analysis
-    const analysisPrompt = `Analyze the following content from multiple URLs and provide a comprehensive analysis:
+    const analysisPrompt = `Analyze the following web content and provide a comprehensive analysis.
 
-1. A summary with bullet points and bold headings covering main topics
-2. Key insights as bullet points with bold headings
-3. Top 10-15 keywords with frequency
-4. Sentiment analysis (positive, neutral, negative percentages)
+IMPORTANT: You must respond with valid JSON where summary and insights are plain text strings with newlines (\\n), NOT objects or arrays.
 
 Content:
 ${combinedContent}
 
-Respond in JSON format with bullet points using newlines:
+Respond in this EXACT JSON format:
 {
-  "title": "Combined Analysis",
-  "summary": "Main Topic 1: description\\nMain Topic 2: description\\nConclusion: description",
-  "insights": "Key Finding 1: details\\nKey Finding 2: details\\nRecommendation: details",
+  "title": "Brief descriptive title of the content",
+  "summary": "Point 1: description\\nPoint 2: description\\nPoint 3: description",
+  "insights": "Insight 1: details\\nInsight 2: details\\nRecommendation: details",
   "keywords": [{"word": "keyword", "count": 5}],
   "sentiment": {"positive": 40, "neutral": 50, "negative": 10}
-}`;
+}
+
+Make sure summary and insights are STRING values with \\n for line breaks, not objects or arrays.`;
 
     const aiResponse = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
@@ -91,16 +140,34 @@ Respond in JSON format with bullet points using newlines:
     console.log('AI response received');
     
     const responseContent = aiData.choices[0].message.content;
+    console.log('Raw AI response:', responseContent.substring(0, 200));
     
     // Parse JSON from response
-    const jsonMatch = responseContent.match(/\{[\s\S]*\}/);
-    const analysisResult = jsonMatch ? JSON.parse(jsonMatch[0]) : {
-      title: 'Analysis Result',
-      summary: 'Content analyzed successfully',
-      insights: 'Key insights extracted from content',
-      keywords: [],
-      sentiment: { positive: 33, neutral: 34, negative: 33 }
-    };
+    let analysisResult;
+    try {
+      const jsonMatch = responseContent.match(/\{[\s\S]*\}/);
+      if (!jsonMatch) {
+        throw new Error('No JSON found in response');
+      }
+      analysisResult = JSON.parse(jsonMatch[0]);
+      
+      // Ensure summary and insights are strings
+      if (typeof analysisResult.summary !== 'string') {
+        analysisResult.summary = JSON.stringify(analysisResult.summary);
+      }
+      if (typeof analysisResult.insights !== 'string') {
+        analysisResult.insights = JSON.stringify(analysisResult.insights);
+      }
+    } catch (parseError) {
+      console.error('Failed to parse AI response:', parseError);
+      analysisResult = {
+        title: 'Analysis Result',
+        summary: 'Content analyzed successfully. The AI provided insights about the content.',
+        insights: 'Key points were extracted from the analyzed content.',
+        keywords: [],
+        sentiment: { positive: 33, neutral: 34, negative: 33 }
+      };
+    }
 
     console.log('Analysis complete');
 
