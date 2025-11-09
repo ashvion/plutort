@@ -84,11 +84,23 @@ serve(async (req) => {
 
     if (!combinedContent.trim()) {
       console.error('No content extracted from any URLs');
-      return new Response(JSON.stringify({ 
-        error: 'Unable to extract content from the provided URLs. They may be blocked or require authentication.',
-        failedUrls 
-      }), {
-        status: 400,
+
+      const fallbackInsights = [
+        '* Access blocked: The provided sites may prevent automated access.',
+        '* Try alternative sources or paste the article text directly.',
+        failedUrls.length ? `* Affected URLs: ${failedUrls.join(', ')}` : ''
+      ].filter(Boolean).join('\n');
+
+      const fallback = {
+        title: 'Analysis Unavailable',
+        summary: 'We could not extract readable content from the provided URL(s). The site may block bots or require authentication.',
+        insights: fallbackInsights,
+        keywords: [],
+        sentiment: { positive: 0, neutral: 100, negative: 0 }
+      };
+
+      return new Response(JSON.stringify(fallback), {
+        status: 200,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
