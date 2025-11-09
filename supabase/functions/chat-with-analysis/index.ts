@@ -13,36 +13,20 @@ serve(async (req) => {
   }
 
   try {
-    const { analysisId, message, context } = await req.json();
+    const { message, context } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
-    const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
 
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    console.log('Chat request for analysis:', analysisId);
-
-    const supabase = createClient(supabaseUrl, supabaseKey);
-
-    // Get previous messages for context
-    const { data: previousMessages } = await supabase
-      .from('chat_messages')
-      .select('role, content')
-      .eq('analysis_id', analysisId)
-      .order('created_at', { ascending: true })
-      .limit(10);
+    console.log('Chat request with context');
 
     const messages = [
       {
         role: 'system',
-        content: `You are a helpful AI assistant analyzing a document. Here's the summary of the content: ${context || 'No context available'}. Answer questions about this content accurately and helpfully.`
+        content: `You are a helpful AI assistant analyzing content. Here's the summary of the content: ${context || 'No context available'}. Answer questions about this content accurately and helpfully.`
       },
-      ...(previousMessages || []).map((msg: any) => ({
-        role: msg.role,
-        content: msg.content
-      })),
       {
         role: 'user',
         content: message

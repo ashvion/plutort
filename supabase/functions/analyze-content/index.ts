@@ -12,45 +12,50 @@ serve(async (req) => {
   }
 
   try {
-    const { type, content, filePath } = await req.json();
+    const { type, urls } = await req.json();
     const LOVABLE_API_KEY = Deno.env.get('LOVABLE_API_KEY');
 
     if (!LOVABLE_API_KEY) {
       throw new Error('LOVABLE_API_KEY not configured');
     }
 
-    console.log('Analyzing content:', { type, hasContent: !!content, hasFilePath: !!filePath });
+    console.log('Analyzing URLs:', { type, urlCount: urls?.length });
 
-    let textContent = '';
+    let combinedContent = '';
     
-    if (type === 'url') {
-      // Fetch URL content
-      const urlResponse = await fetch(content);
-      textContent = await urlResponse.text();
-      // Extract main text (simplified - in production use a proper HTML parser)
-      textContent = textContent.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').substring(0, 5000);
-    } else if (type === 'pdf') {
-      // For PDF, we'd need to extract text - for now use a placeholder
-      textContent = 'PDF content analysis placeholder - implement PDF parsing';
+    if (type === 'url' && Array.isArray(urls)) {
+      // Fetch all URLs and combine content
+      for (const url of urls) {
+        try {
+          const urlResponse = await fetch(url);
+          let text = await urlResponse.text();
+          // Extract main text (simplified)
+          text = text.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').substring(0, 3000);
+          combinedContent += `\n\n--- Content from ${url} ---\n${text}`;
+        } catch (error) {
+          console.error(`Failed to fetch ${url}:`, error);
+        }
+      }
     }
 
-    console.log('Extracted text length:', textContent.length);
+    console.log('Extracted combined text length:', combinedContent.length);
 
     // Call Lovable AI for analysis
-    const analysisPrompt = `Analyze the following content and provide:
-1. A concise summary (2-3 sentences)
-2. Key insights (3-5 bullet points)
+    const analysisPrompt = `Analyze the following content from multiple URLs and provide a comprehensive analysis:
+
+1. A summary with bullet points and bold headings covering main topics
+2. Key insights as bullet points with bold headings
 3. Top 10-15 keywords with frequency
 4. Sentiment analysis (positive, neutral, negative percentages)
 
 Content:
-${textContent}
+${combinedContent}
 
-Respond in JSON format:
+Respond in JSON format with bullet points using newlines:
 {
-  "title": "content title",
-  "summary": "summary text",
-  "insights": "key insights",
+  "title": "Combined Analysis",
+  "summary": "Main Topic 1: description\\nMain Topic 2: description\\nConclusion: description",
+  "insights": "Key Finding 1: details\\nKey Finding 2: details\\nRecommendation: details",
   "keywords": [{"word": "keyword", "count": 5}],
   "sentiment": {"positive": 40, "neutral": 50, "negative": 10}
 }`;

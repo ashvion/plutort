@@ -8,3 +8,9 @@ verify_jwt = true
 
 [functions.general-chat]
 verify_jwt = false
+
+[functions.chat-with-analysis]
+verify_jwt = false
+
+[functions.analyze-content]
+verify_jwt = false

@@ -14,13 +14,16 @@ interface Message {
 
 interface ChatBotProps {
   onClose: () => void;
+  context?: string;
 }
 
-const ChatBot = ({ onClose }: ChatBotProps) => {
+const ChatBot = ({ onClose, context }: ChatBotProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "assistant",
-      content: "Hi! I'm your AI research assistant. Ask me anything about content analysis, research tools, or how I can help you!"
+      content: context 
+        ? "Hi! I'm your AI research assistant. Ask me anything about the analyzed content!"
+        : "Hi! I'm your AI research assistant. Ask me anything about content analysis, research tools, or how I can help you!"
     }
   ]);
   const [input, setInput] = useState("");
@@ -41,8 +44,13 @@ const ChatBot = ({ onClose }: ChatBotProps) => {
     setLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke("general-chat", {
-        body: { message: userMessage }
+      const functionName = context ? "chat-with-analysis" : "general-chat";
+      const body = context 
+        ? { message: userMessage, context }
+        : { message: userMessage };
+
+      const { data, error } = await supabase.functions.invoke(functionName, {
+        body
       });
 
       if (error) throw error;
@@ -61,8 +69,8 @@ const ChatBot = ({ onClose }: ChatBotProps) => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)]">
-      <Card className="shadow-2xl border-2">
+    <div className={context ? "" : "fixed bottom-6 right-6 z-50 w-96 max-w-[calc(100vw-3rem)]"}>
+      <Card className="shadow-2xl border-2 h-full">
         <CardHeader className="pb-3 bg-gradient-primary text-primary-foreground rounded-t-lg">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
@@ -80,7 +88,7 @@ const ChatBot = ({ onClose }: ChatBotProps) => {
           </div>
         </CardHeader>
         <CardContent className="p-4">
-          <div className="h-96 overflow-y-auto space-y-4 mb-4">
+          <div className={`${context ? 'h-[600px]' : 'h-96'} overflow-y-auto space-y-4 mb-4`}>
             {messages.map((msg, idx) => (
               <div
                 key={idx}
