@@ -52,7 +52,7 @@ const Landing = () => {
               <div className="p-2 bg-gradient-primary rounded-lg">
                 <Brain className="h-6 w-6 text-primary-foreground" />
               </div>
-              <span className="font-bold text-lg">AI Research Tool</span>
+              <span className="font-bold text-lg">PlutoRT</span>
             </div>
             <Button onClick={() => navigate("/analyze")} size="lg">
               Get Started
