@@ -40,7 +40,11 @@ ${keywords.map((kw: any) => typeof kw === 'string' ? kw : kw.word).join(', ')}
   };
 
   // Format summary into bullet points with bold headings
-  const formatSummary = (text: string) => {
+  const formatSummary = (text: string | null | undefined) => {
+    if (!text || typeof text !== 'string') {
+      return <li className="text-muted-foreground">No data available</li>;
+    }
+    
     const lines = text.split('\n').filter(line => line.trim());
     return lines.map((line, idx) => {
       // Check if line contains a colon (likely a heading)
