@@ -34,40 +34,43 @@ serve(async (req) => {
               'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
               'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
               'Accept-Language': 'en-US,en;q=0.5',
-              'Accept-Encoding': 'gzip, deflate, br',
               'Connection': 'keep-alive',
               'Upgrade-Insecure-Requests': '1'
             }
           });
           
-          if (!urlResponse.ok) {
-            console.error(`Failed to fetch ${url}: ${urlResponse.status}`);
-            failedUrls.push(url);
-            continue;
+          let text = '';
+
+          if (urlResponse.ok) {
+            let html = await urlResponse.text();
+            // Remove script and style tags
+            html = html.replace(/<script\b[^<]*(?:(?!<\/script>).)*<\/script>/gi, '');
+            html = html.replace(/<style\b[^<]*(?:(?!<\/style>).)*<\/style>/gi, '');
+            
+            // Try to extract main content (common article selectors)
+            const articleMatch = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
+            const mainMatch = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
+            const contentMatch = html.match(/<div[^>]*class="[^"]*content[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
+            
+            let candidate = articleMatch?.[1] || mainMatch?.[1] || contentMatch?.[1] || html;
+            // Strip remaining HTML tags and normalize whitespace
+            text = candidate.replace(/<[^>]*>/g, ' ').replace(/\s+/g, ' ').trim().substring(0, 6000);
           }
 
-          let html = await urlResponse.text();
-          
-          // Better content extraction - focus on main content areas
-          // Remove script and style tags
-          html = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '');
-          html = html.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, '');
-          
-          // Try to extract main content (common article selectors)
-          const articleMatch = html.match(/<article[^>]*>([\s\S]*?)<\/article>/i);
-          const mainMatch = html.match(/<main[^>]*>([\s\S]*?)<\/main>/i);
-          const contentMatch = html.match(/<div[^>]*class="[^"]*content[^"]*"[^>]*>([\s\S]*?)<\/div>/i);
-          
-          let text = articleMatch?.[1] || mainMatch?.[1] || contentMatch?.[1] || html;
-          
-          // Strip remaining HTML tags
-          text = text.replace(/<[^>]*>/g, ' ');
-          // Clean up whitespace
-          text = text.replace(/\s+/g, ' ').trim();
-          // Limit length per URL
-          text = text.substring(0, 4000);
-          
-          if (text.length < 100) {
+          // If initial fetch failed or text too short, try Jina Reader fallback
+          if (!urlResponse.ok || text.length < 200) {
+            const jinaUrl = `https://r.jina.ai/${url}`;
+            console.log(`Trying Jina Reader fallback: ${jinaUrl}`);
+            const jinaResp = await fetch(jinaUrl, { headers: { 'Accept': 'text/plain' } });
+            if (jinaResp.ok) {
+              const jinaText = (await jinaResp.text()).trim();
+              if (jinaText.length >= 200) {
+                text = jinaText.substring(0, 8000);
+              }
+            }
+          }
+
+          if (!text || text.length < 100) {
             console.warn(`Extracted text too short for ${url}, might be blocked or have no content`);
             failedUrls.push(url);
             continue;

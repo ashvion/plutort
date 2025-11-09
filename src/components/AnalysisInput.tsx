@@ -47,9 +47,12 @@ const AnalysisInput = ({ onAnalysisComplete }: AnalysisInputProps) => {
     setLoading(true);
 
     try {
+      // Normalize URLs to include scheme
+      const normalizedUrls = validUrls.map((u) => (u.match(/^https?:\/\//) ? u : `https://${u}`));
+
       // Call edge function to analyze URLs
       const { data, error } = await supabase.functions.invoke("analyze-content", {
-        body: { type: "url", urls: validUrls }
+        body: { type: "url", urls: normalizedUrls }
       });
 
       if (error) {
