@@ -92,7 +92,7 @@ const Landing = () => {
           </div>
 
           {/* Demo Visual */} 
-          {/* <div className="mt-12 relative">
+          {/* <div className="mt-12">
             <div className="absolute inset-0 bg-gradient-primary opacity-20 blur-3xl rounded-full" />
             <Card className="relative border-2 shadow-2xl">
               <CardContent className="p-8">
@@ -115,9 +115,9 @@ const Landing = () => {
                 </div>
               </CardContent>
             </Card>
-          </div> */}
+          </div> 
         </div>
-      </section>
+      </section> */}
 
       {/* Features Grid */}
       <section className="container mx-auto px-4 py-20">
