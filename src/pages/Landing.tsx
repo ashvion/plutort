@@ -1,7 +1,17 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Brain, FileText, MessageSquare, TrendingUp, Zap, Shield, Link } from "lucide-react";
+import {
+  Brain,
+  FileText,
+  MessageSquare,
+  TrendingUp,
+  Zap,
+  Shield,
+  Search,
+  BarChart3,
+  Database
+} from "lucide-react";
 import ChatBot from "@/components/ChatBot";
 import { useNavigate } from "react-router-dom";
 
@@ -9,37 +19,50 @@ const Landing = () => {
   const [showChat, setShowChat] = useState(false);
   const navigate = useNavigate();
 
+  // 🌈 Updated Features with Themed Gradients and Relevant Icons
   const features = [
     {
-      icon: Brain,
+      icon: Search,
       title: "AI-Powered Analysis",
-      description: "Advanced AI analyzes your content and extracts key insights automatically"
+      description:
+        "Advanced AI scans your content and extracts deep insights automatically.",
+      color: "from-[#00B4D8] to-[#0077B6]",
     },
     {
       icon: TrendingUp,
       title: "Sentiment Detection",
-      description: "Understand the emotional tone and sentiment patterns in your documents"
+      description:
+        "Understand emotional tones and sentiment patterns in your documents.",
+      color: "from-[#90E0EF] to-[#00B4D8]",
     },
     {
       icon: FileText,
       title: "Smart Summaries",
-      description: "Get concise, intelligent summaries of lengthy articles and PDFs"
+      description:
+        "Get concise, intelligent summaries of lengthy articles and PDFs instantly.",
+      color: "from-[#48CAE4] to-[#0096C7]",
     },
     {
       icon: MessageSquare,
       title: "Interactive Chat",
-      description: "Ask follow-up questions and dive deeper into your analysis"
+      description:
+        "Ask questions, clarify results, and explore your data through AI conversation.",
+      color: "from-[#00B4D8] to-[#48CAE4]",
     },
     {
-      icon: Zap,
-      title: "Instant Results",
-      description: "Lightning-fast processing with real-time insights and visualizations"
+      icon: BarChart3,
+      title: "Instant Insights",
+      description:
+        "Visualize data trends with real-time charts and analytical breakdowns.",
+      color: "from-[#0077B6] to-[#023E8A]",
     },
     {
       icon: Shield,
       title: "Secure & Private",
-      description: "Your data is encrypted and stored securely with enterprise-grade protection"
-    }
+      description:
+        "Your research data is encrypted and handled with enterprise-grade protection.",
+      color: "from-[#00B4D8] to-[#03045E]",
+    },
   ];
 
   return (
@@ -68,56 +91,40 @@ const Landing = () => {
             <Zap className="h-4 w-4" />
             Powered by Advanced AI
           </div>
-          
+
           <h1 className="text-5xl md:text-7xl font-bold leading-tight">
             Research Smarter with{" "}
             <span className="bg-gradient-primary bg-clip-text text-transparent">
               AI Analysis
             </span>
           </h1>
-          
+
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-            Transform articles and documents into actionable insights. Get AI-powered summaries, 
-            sentiment analysis, and interactive Q&A in seconds.
+            Transform articles and documents into actionable insights. Get
+            AI-powered summaries, sentiment analysis, and interactive Q&A in
+            seconds.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" onClick={() => navigate("/analyze")} className="text-lg px-8">
+            <Button
+              size="lg"
+              onClick={() => navigate("/analyze")}
+              className="text-lg px-8"
+            >
               Start Analyzing
             </Button>
-            <Button size="lg" variant="outline" onClick={() => setShowChat(true)} className="text-lg px-8">
+            <Button
+              size="lg"
+              variant="outline"
+              onClick={() => setShowChat(true)}
+              className="text-lg px-8"
+            >
               <MessageSquare className="mr-2 h-5 w-5" />
               Ask Questions
             </Button>
           </div>
-
-          {/* Demo Visual */} 
-          {/* <div className="mt-12">
-            <div className="absolute inset-0 bg-gradient-primary opacity-20 blur-3xl rounded-full" />
-            <Card className="relative border-2 shadow-2xl">
-              <CardContent className="p-8">
-                <div className="grid md:grid-cols-3 gap-6 text-left">
-                  <div className="space-y-2">
-                    <div className="h-3 bg-primary/20 rounded w-3/4" />
-                    <div className="h-3 bg-primary/10 rounded w-full" />
-                    <div className="h-3 bg-primary/10 rounded w-5/6" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-3 bg-accent/20 rounded w-2/3" />
-                    <div className="h-3 bg-accent/10 rounded w-full" />
-                    <div className="h-3 bg-accent/10 rounded w-4/5" />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="h-3 bg-secondary rounded w-3/5" />
-                    <div className="h-3 bg-muted rounded w-full" />
-                    <div className="h-3 bg-muted rounded w-3/4" />
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          </div> 
         </div>
-      </section> */}
+      </section>
 
       {/* Features Grid */}
       <section className="container mx-auto px-4 py-20">
@@ -126,7 +133,7 @@ const Landing = () => {
             Everything You Need for Research
           </h2>
           <p className="text-muted-foreground text-lg">
-            Powerful features to help you understand and analyze content faster
+            Powerful tools to help you understand and analyze content faster
           </p>
         </div>
 
@@ -134,13 +141,20 @@ const Landing = () => {
           {features.map((feature, idx) => {
             const Icon = feature.icon;
             return (
-              <Card key={idx} className="border-2 hover:border-primary/50 transition-all hover:shadow-lg">
+              <Card
+                key={idx}
+                className="border-2 hover:border-primary/50 transition-all hover:shadow-lg hover:-translate-y-1 duration-300"
+              >
                 <CardContent className="p-6 space-y-4">
-                  <div className="p-3 bg-gradient-primary rounded-lg w-fit">
-                    <Icon className="h-6 w-6 text-primary-foreground" />
+                  <div
+                    className={`p-4 rounded-xl w-fit bg-gradient-to-br ${feature.color} shadow-md hover:shadow-lg transition-all duration-300`}
+                  >
+                    <Icon className="h-7 w-7 text-white drop-shadow-sm" />
                   </div>
                   <h3 className="text-xl font-semibold">{feature.title}</h3>
-                  <p className="text-muted-foreground">{feature.description}</p>
+                  <p className="text-muted-foreground">
+                    {feature.description}
+                  </p>
                 </CardContent>
               </Card>
             );
@@ -162,7 +176,9 @@ const Landing = () => {
               1
             </div>
             <h3 className="text-xl font-semibold">Add Content</h3>
-            <p className="text-muted-foreground">Paste a URL or upload a PDF document</p>
+            <p className="text-muted-foreground">
+              Paste a URL or upload a PDF document
+            </p>
           </div>
 
           <div className="text-center space-y-4">
@@ -170,7 +186,9 @@ const Landing = () => {
               2
             </div>
             <h3 className="text-xl font-semibold">AI Analysis</h3>
-            <p className="text-muted-foreground">Get instant insights, summaries, and charts</p>
+            <p className="text-muted-foreground">
+              Get instant insights, summaries, and charts
+            </p>
           </div>
 
           <div className="text-center space-y-4">
@@ -178,7 +196,9 @@ const Landing = () => {
               3
             </div>
             <h3 className="text-xl font-semibold">Explore & Export</h3>
-            <p className="text-muted-foreground">Chat with AI and export your findings</p>
+            <p className="text-muted-foreground">
+              Chat with AI and export your findings
+            </p>
           </div>
         </div>
       </section>
@@ -191,9 +211,15 @@ const Landing = () => {
               Ready to Transform Your Research?
             </h2>
             <p className="text-lg opacity-90 max-w-2xl mx-auto">
-              Join thousands of researchers, students, and professionals using AI to understand content faster
+              Join thousands of researchers, students, and professionals using
+              AI to understand content faster.
             </p>
-            <Button size="lg" variant="secondary" onClick={() => navigate("/analyze")} className="text-lg px-8">
+            <Button
+              size="lg"
+              variant="secondary"
+              onClick={() => navigate("/analyze")}
+              className="text-lg px-8"
+            >
               Start Free Now
             </Button>
           </CardContent>
@@ -203,7 +229,7 @@ const Landing = () => {
       {/* Footer */}
       <footer className="border-t border-border/40 bg-card/50 backdrop-blur-sm mt-20">
         <div className="container mx-auto px-4 py-8 text-center text-muted-foreground">
-          <p>© 2024 AI Research Tool. Powered by advanced AI technology.</p>
+          <p>© 2025 PlutoRT. Powered by Advanced AI Technology.</p>
         </div>
       </footer>
 
