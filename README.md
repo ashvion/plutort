@@ -17,20 +17,34 @@ Live Demo: https://plutort.vercel.app/
 -Secure environment variable management (see .gitignore)
 
 **Tech Stack**
-Vite
-TypeScript
-React
-shadcn-ui
-Tailwind CSS
-Supabase (for serverless functions and backend)
-Deployment: Vercel
+
+-Vite
+
+-TypeScript
+
+-React
+
+-shadcn-ui
+
+-Tailwind CSS
+
+-Supabase (for serverless functions and backend)
+
+-Deployment: Vercel
 
 
 **Getting Started**
-Clone the repository
-Install dependencies: npm install
-Create a .env file (see .env.example if available)
-Run locally: npm run dev
-Security
-Sensitive files like .env are excluded from version control.
-Do not share your API keys or secrets publicly.
+
+-Clone the repository
+
+-Install dependencies: npm install
+
+-Create a .env file (see .env.example if available)
+
+-Run locally: npm run dev
+
+**Security**
+
+-Sensitive files like .env are excluded from version control.
+
+-Do not share your API keys or secrets publicly.
