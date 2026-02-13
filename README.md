@@ -1,6 +1,6 @@
 **PlutoRT**
 
--PlutoRT is a research tool that leverages LLM and NLP technologies, using Gemini 2.5 Flash as its core API for content analysis and chatbot features.
+PlutoRT is a research tool that leverages LLM and NLP technologies, using Gemini 2.5 Flash as its core API for content analysis and chatbot features.
 
 Live Demo: https://plutort.vercel.app/
 
